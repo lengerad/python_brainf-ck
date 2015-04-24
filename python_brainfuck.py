@@ -1,10 +1,20 @@
 __author__ = 'radimsky'
 
+import sys
+
+
 class BrainFuck:
     def __init__(self, data, memoryinit=b'\x00'):
         self.memory = bytearray(memoryinit)
-        self.data = data
         self.memory_pointer = 0
+
+        try:
+            with open(data, 'r') as file:
+                self.data = file.read()
+                self.interpretBrainfuck(self.data)
+        except EnvironmentError:
+            self.data = data
+            self.interpretBrainfuck(self.data)
 
     def interpretBrainfuck(self, data):
 
@@ -51,6 +61,9 @@ class BrainFuck:
             if data[pointer] == '.' :
                 print(chr(self.memory[self.memory_pointer]))
 
+            if data[pointer] == ',':
+                self.memory[self.memory_pointer] = ord(sys.stdin.read(1))
+
             pointer += 1
 
     # Method recieves data from the first opening bracket '['
@@ -68,7 +81,8 @@ class BrainFuck:
 
 # Test run
 if __name__ == '__main__':
-    data = '++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.'
-
-    bfCode = BrainFuck(data)
-    bfCode.interpretBrainfuck(data)
+    if ( len(sys.argv) < 2):
+        data = '++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.'
+        bfCode = BrainFuck(data)
+    else:
+        bfCode = BrainFuck(sys.argv[1])

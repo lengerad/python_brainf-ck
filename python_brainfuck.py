@@ -4,15 +4,22 @@ import sys
 
 
 class BrainFuck:
-    def __init__(self, data, memoryinit=b'\x00'):
-        self.memory = bytearray(memoryinit)
+    def __init__(self, data, memoryInit=b'\x00'):
+        self.memory = bytearray(memoryInit)
         self.memory_pointer = 0
 
-        try:
-            with open(data, 'r') as file:
-                self.data = file.read()
-                self.interpretBrainfuck(self.data)
-        except EnvironmentError:
+        if ".b" in data:
+            try:
+                with open(data, 'r') as file:
+                    self.data = file.read()
+                    self.interpretBrainfuck(self.data)
+            except EnvironmentError:
+                pass
+        elif ".png" in data:
+            self.interpretPNG(data)
+
+
+        else:
             self.data = data
             self.interpretBrainfuck(self.data)
 
@@ -78,6 +85,12 @@ class BrainFuck:
 
         # code inside brackets
         return (data[1:endOfLoop-1])
+
+    def interpretPNG(self, filename):
+        from myPNGlibrary import PNGhandler as handler
+
+        handler(filename)
+
 
 # Test run
 if __name__ == '__main__':

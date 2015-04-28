@@ -96,8 +96,9 @@ class Brainloller:
         self.rows = len(self.pictureData)
         self.columns = len(self.pictureData[0])
         self.brainFuckCode = ''
-        self.rowChange = 0
-        self.columnChange = 1
+        self.movingTwice = list()
+        self.movingTwice.append(0)
+        self.movingTwice.append(1)
         # print(self.pictureData)
         self.getThatFuck()
 
@@ -108,8 +109,8 @@ class Brainloller:
         while (rowPointer < self.rows and columnPointer < self.columns and rowPointer >= 0 and columnPointer >= 0):
             self.decodeColor(self.pictureData[rowPointer][columnPointer])
             # print(self.brainFuckCode)
-            rowPointer += self.rowChange
-            columnPointer += self.columnChange
+            rowPointer += self.movingTwice[0]
+            columnPointer += self.movingTwice[1]
             #print(rowPointer,columnPointer)
 
         # print(self.brainFuckCode)
@@ -139,38 +140,22 @@ class Brainloller:
 
     def turnChangers(self, direction):
         if (direction == 'right'):
-            if (self.rowChange == 0 and self.columnChange == 1):
-                self.rowChange = 1
-                self.columnChange = 0
+            if self.movingTwice[0] == 0:
+                self.movingTwice[0] = self.movingTwice[1]
+                self.movingTwice[1] = 0
                 return
-            if (self.rowChange == 1 and self.columnChange == 0):
-                self.rowChange = 0
-                self.columnChange = -1
-                return
-            if (self.rowChange == -1 and self.columnChange == 0):
-                self.rowChange = 0
-                self.columnChange = 1
-                return
-            if (self.rowChange == 0 and self.columnChange == -1):
-                self.rowChange = -1
-                self.columnChange = 0
+            else:
+                self.movingTwice[1] = -self.movingTwice[0]
+                self.movingTwice[0] = 0
                 return
         if (direction == 'left'):
-            if (self.rowChange == 0 and self.columnChange == 1):
-                self.rowChange = -1
-                self.columnChange = 0
+            if self.movingTwice[0] == 0:
+                self.movingTwice[0] = -self.movingTwice[1]
+                self.movingTwice[1] = 0
                 return
-            if (self.rowChange == 1 and self.columnChange == 0):
-                self.rowChange = 0
-                self.columnChange = 1
-                return
-            if (self.rowChange == -1 and self.columnChange == 0):
-                self.rowChange = 0
-                self.columnChange = -1
-                return
-            if (self.rowChange == 0 and self.columnChange == -1):
-                self.rowChange = 1
-                self.columnChange = 0
+            else:
+                self.movingTwice[1] = self.movingTwice[0]
+                self.movingTwice[0] = 0
                 return
 
 # Test run

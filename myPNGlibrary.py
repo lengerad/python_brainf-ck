@@ -65,9 +65,11 @@ class pngHandler():
 
     def reconstructPixel(self, filterType, pixel):
         if filterType == 0:
+            self.a = pixel;
             return pixel
         if filterType == 1:
-            return self.sumBytes(pixel, self.a)
+            self.a = self.sumBytes(pixel, self.a)
+            return self.a
         if filterType == 2:
             return self.sumBytes(pixel, self.b)
         if filterType == 3:
@@ -102,7 +104,7 @@ class pngHandler():
         self.parseBinaryData()
         self.decodeIHDR()
         self.getIDATData()
-        print(self.decompressedData)
+        # print(self.decompressedData)
 
         self.pictureArray = [[0 for i in range(self.imageLength)] for i in range(self.imageHeight)]
         width = 0;
@@ -110,9 +112,14 @@ class pngHandler():
         pointer = 0;
 
         for i in range(0, self.imageHeight):
+            self.a = (0, 0, 0)
             filter = self.decompressedData[pointer]
             pointer += 1
             for j in range(0, self.imageLength):
+                if (i > 0):
+                    self.b = self.pictureArray[i - 1][j]
+                if (i > 0 and j > 0):
+                    self.c = self.pictureArray[i - 1][j - 1]
                 pixel = (
                 self.decompressedData[pointer], self.decompressedData[pointer + 1], self.decompressedData[pointer + 2])
                 self.pictureArray[i][j] = self.reconstructPixel(filter, pixel)

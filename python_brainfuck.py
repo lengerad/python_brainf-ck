@@ -17,8 +17,6 @@ class BrainFuck:
                 pass
         elif ".png" in data:
             self.interpretPNG(data)
-
-
         else:
             self.data = data
             self.interpretBrainfuck(self.data)
@@ -38,12 +36,11 @@ class BrainFuck:
                     self.memory[self.memory_pointer] = 0
 
             if data[pointer] == '-':
-                self.memory[self.memory_pointer] -= 1
-
                 # Overflow detection
-                if (self.memory[self.memory_pointer] == -1):
+                if (self.memory[self.memory_pointer] == -0):
                     self.memory[self.memory_pointer] = 0
-
+                else:
+                    self.memory[self.memory_pointer] -= 1
 
             # Move memory pointer for one position right
             # In case that field is not big enough, allocate new space

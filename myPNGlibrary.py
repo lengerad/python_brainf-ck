@@ -19,13 +19,17 @@ class pngHandler():
 
         # print(self.binaryData)
         self.createArray()
+        self.decompressedData = []
+        self.imageWidth = 0
+        self.imageHeight = 0
+
         self.a = (0, 0, 0)
         self.b = (0, 0, 0)
         self.c = (0, 0, 0)
 
 
     def checkHeader(self, binaryData):
-        if (binaryData[:8] != b'\x89PNG\r\n\x1a\n'):
+        if binaryData[:8] != b'\x89PNG\r\n\x1a\n':
             raise PNGWrongHeaderError()
             sys.exit(4)
         else:
@@ -49,19 +53,21 @@ class pngHandler():
     def decodeIHDR(self):
         for chunk in self.pngData:
             if chunk['chunkType'] == b'IHDR':
-                self.imageLength = int.from_bytes(chunk['chunkData'][0:4], byteorder='big', signed='False')
+                self.imageWidth = int.from_bytes(chunk['chunkData'][0:4], byteorder='big', signed='False')
                 self.imageHeight = int.from_bytes(chunk['chunkData'][4:8], byteorder='big', signed='False')
-                controlBytes = byteDepth = int.from_bytes(chunk['chunkData'][9:13], byteorder='big', signed='False')
+                controlBytes = int.from_bytes(chunk['chunkData'][9:13], byteorder='big', signed='False')
 
         if controlBytes != 33554432:
             raise PNGNotImplementedError
             sys.exit(8)
 
     def getIDATData(self):
-        self.decompressedData = []
+        tempData = b''
         for chunk in self.pngData:
             if chunk['chunkType'] == b'IDAT':
-                self.decompressedData += zlib.decompress(chunk['chunkData'])
+                tempData += chunk['chunkData']
+
+        self.decompressedData = zlib.decompress(tempData)
 
     def reconstructPixel(self, filterType, pixel):
         if filterType == 0:
@@ -73,9 +79,11 @@ class pngHandler():
         if filterType == 2:
             return self.sumBytes(pixel, self.b)
         if filterType == 3:
-            return self.sumBytes(pixel, self.sumBytes(self.a, self.b) / 2)
+            self.a = self.sumBytes(pixel, self.sumBytes(self.a, self.b) / 2)
+            return self.a
         if filterType == 4:
-            return self.sumBytes(pixel, self.paethPredictor(self.a, self.b, self.c))
+            self.a = self.sumBytes(pixel, self.paethPredictor(self.a, self.b, self.c))
+            return self.a
 
     def sumBytes(self, pixel, pixel2):
         return ((pixel[0] + pixel2[0]) % 256, (pixel[1] + pixel2[1]) % 256, (pixel[2] + pixel2[2]) % 256)
@@ -106,23 +114,20 @@ class pngHandler():
         self.getIDATData()
         # print(self.decompressedData)
 
-        self.pictureArray = [[0 for i in range(self.imageLength)] for i in range(self.imageHeight)]
-        width = 0;
-        height = 0;
+        self.pictureArray = [[0 for i in range(self.imageWidth)] for i in range(self.imageHeight)]
         pointer = 0;
-
         for i in range(0, self.imageHeight):
             self.a = (0, 0, 0)
+            self.b = (0, 0, 0)
+            self.c = (0, 0, 0)
             filter = self.decompressedData[pointer]
             pointer += 1
-            for j in range(0, self.imageLength):
-                if (i > 0):
+            for j in range(0, self.imageWidth):
+                if i > 0:
                     self.b = self.pictureArray[i - 1][j]
-                if (i > 0 and j > 0):
+                if i > 0 and j > 0:
                     self.c = self.pictureArray[i - 1][j - 1]
                 pixel = (
                 self.decompressedData[pointer], self.decompressedData[pointer + 1], self.decompressedData[pointer + 2])
                 self.pictureArray[i][j] = self.reconstructPixel(filter, pixel)
                 pointer += 3
-
-        print(self.pictureArray)

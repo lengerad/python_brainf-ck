@@ -3,23 +3,29 @@ __author__ = 'radimsky'
 import sys
 
 
+def handleInput(data):
+    if ".b" in data:
+        bfCoe = BrainFuck(data)
+    elif ".png" in data:
+        from myPNGlibrary import pngHandler as handler
+
+        pictureData = handler(data).pictureArray
+        brainLoller = Brainloller(pictureData)
+    else:
+        pass
+
 class BrainFuck:
     def __init__(self, data, memoryInit=b'\x00'):
         self.memory = bytearray(memoryInit)
         self.memory_pointer = 0
-
-        if ".b" in data:
-            try:
-                with open(data, 'r') as file:
-                    self.data = file.read()
-                    self.interpretBrainfuck(self.data)
-            except EnvironmentError:
-                pass
-        elif ".png" in data:
-            self.interpretPNG(data)
-        else:
+        try:
+            with open(data, 'r') as file:
+                self.data = file.read()
+                self.interpretBrainfuck(self.data)
+        except EnvironmentError:
             self.data = data
             self.interpretBrainfuck(self.data)
+
 
     def interpretBrainfuck(self, data):
 
@@ -83,10 +89,80 @@ class BrainFuck:
         # code inside brackets
         return (data[1:endOfLoop-1])
 
-    def interpretPNG(self, filename):
-        from myPNGlibrary import pngHandler as handler
-        handler(filename)
 
+class Brainloller:
+    def __init__(self, pictureData):
+        self.pictureData = pictureData
+        self.rows = len(self.pictureData)
+        self.columns = len(self.pictureData[0])
+        self.brainFuckCode = ''
+        self.rowChange = 0
+        self.columnChange = 1
+        # print(self.pictureData)
+        self.getThatFuck()
+
+
+    def getThatFuck(self):
+        rowPointer = 0
+        columnPointer = 0
+        while (rowPointer < self.rows and columnPointer < self.columns and rowPointer >= 0 and columnPointer >= 0):
+            self.decodeColor(self.pictureData[rowPointer][columnPointer])
+            print(self.brainFuckCode)
+            rowPointer += self.rowChange
+            columnPointer += self.columnChange
+
+        print(self.brainFuckCode)
+        # brainFuck = BrainFuck(self.brainFuckCode)
+
+    def decodeColor(self, pixel):
+        if (pixel == (255, 0, 0)):
+            self.brainFuckCode += '>'
+        if (pixel == (128, 0, 0)):
+            self.brainFuckCode += '<'
+        if (pixel == (0, 255, 0)):
+            self.brainFuckCode += '+'
+        if (pixel == (0, 128, 0)):
+            self.brainFuckCode += '-'
+        if (pixel == (0, 0, 255)):
+            self.brainFuckCode += '.'
+        if (pixel == (0, 0, 128)):
+            self.brainFuckCode += ','
+        if (pixel == (255, 255, 0)):
+            self.brainFuckCode += '['
+        if (pixel == (128, 128, 0)):
+            self.brainFuckCode += ']'
+        if (pixel == (0, 255, 255)):
+            self.turnChangers('right')
+        if (pixel == (0, 128, 128)):
+            self.turnChangers("left")
+
+    def turnChangers(self, direction):
+        if (direction == 'right'):
+            if (self.rowChange == 0 and self.columnChange == 1):
+                self.rowChange = 1
+                self.columnChange = 0
+            if (self.rowChange == 1 and self.columnChange == 0):
+                self.rowChange = 0
+                self.columnChange = -1
+            if (self.rowChange == -1 and self.columnChange == 0):
+                self.rowChange = 0
+                self.columnChange = 1
+            if (self.rowChange == 0 and self.columnChange == -1):
+                self.rowChange = -1
+                self.columnChange = 0
+        if (direction == 'left'):
+            if (self.rowChange == 0 and self.columnChange == 1):
+                self.rowChange = -1
+                self.columnChange = 0
+            if (self.rowChange == 1 and self.columnChange == 0):
+                self.rowChange = 0
+                self.columnChange = 1
+            if (self.rowChange == -1 and self.columnChange == 0):
+                self.rowChange = 0
+                self.columnChange = -1
+            if (self.rowChange == 0 and self.columnChange == -1):
+                self.rowChange = 1
+                self.columnChange = 0
 
 # Test run
 if __name__ == '__main__':
@@ -94,4 +170,4 @@ if __name__ == '__main__':
         data = '++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.'
         bfCode = BrainFuck(data)
     else:
-        bfCode = BrainFuck(sys.argv[1])
+        handleInput(sys.argv[1])

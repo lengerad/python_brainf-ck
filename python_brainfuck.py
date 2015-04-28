@@ -87,8 +87,7 @@ class BrainFuck:
         return (data[1:endOfLoop-1])
 
     def interpretPNG(self, filename):
-        from myPNGlibrary import PNGhandler as handler
-
+        from myPNGlibrary import pngHandler as handler
         handler(filename)
 
 

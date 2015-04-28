@@ -107,12 +107,13 @@ class Brainloller:
         columnPointer = 0
         while (rowPointer < self.rows and columnPointer < self.columns and rowPointer >= 0 and columnPointer >= 0):
             self.decodeColor(self.pictureData[rowPointer][columnPointer])
-            print(self.brainFuckCode)
+            # print(self.brainFuckCode)
             rowPointer += self.rowChange
             columnPointer += self.columnChange
+            #print(rowPointer,columnPointer)
 
-        print(self.brainFuckCode)
-        # brainFuck = BrainFuck(self.brainFuckCode)
+        # print(self.brainFuckCode)
+        brainFuck = BrainFuck(self.brainFuckCode)
 
     def decodeColor(self, pixel):
         if (pixel == (255, 0, 0)):
@@ -141,28 +142,36 @@ class Brainloller:
             if (self.rowChange == 0 and self.columnChange == 1):
                 self.rowChange = 1
                 self.columnChange = 0
+                return
             if (self.rowChange == 1 and self.columnChange == 0):
                 self.rowChange = 0
                 self.columnChange = -1
+                return
             if (self.rowChange == -1 and self.columnChange == 0):
                 self.rowChange = 0
                 self.columnChange = 1
+                return
             if (self.rowChange == 0 and self.columnChange == -1):
                 self.rowChange = -1
                 self.columnChange = 0
+                return
         if (direction == 'left'):
             if (self.rowChange == 0 and self.columnChange == 1):
                 self.rowChange = -1
                 self.columnChange = 0
+                return
             if (self.rowChange == 1 and self.columnChange == 0):
                 self.rowChange = 0
                 self.columnChange = 1
+                return
             if (self.rowChange == -1 and self.columnChange == 0):
                 self.rowChange = 0
                 self.columnChange = -1
+                return
             if (self.rowChange == 0 and self.columnChange == -1):
                 self.rowChange = 1
                 self.columnChange = 0
+                return
 
 # Test run
 if __name__ == '__main__':

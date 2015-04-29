@@ -10,7 +10,7 @@ def handleInput(data):
         from myPNGlibrary import pngHandler as handler
 
         pictureData = handler(data).pictureArray
-        brainLoller = Brainloller(pictureData)
+        brainLoller = Braincopter(pictureData)
     else:
         pass
 
@@ -69,7 +69,8 @@ class BrainFuck:
                 pointer += len(loopData) + 1
 
             if data[pointer] == '.' :
-                print(chr(self.memory[self.memory_pointer]))
+                sys.stdout.write(chr(self.memory[self.memory_pointer]))
+                sys.stdout.flush()
 
             if data[pointer] == ',':
                 self.memory[self.memory_pointer] = ord(sys.stdin.read(1))
@@ -89,6 +90,81 @@ class BrainFuck:
         # code inside brackets
         return (data[1:endOfLoop-1])
 
+
+class Braincopter:
+    def __init__(self, pictureData):
+        self.pictureData = pictureData
+        self.rows = len(self.pictureData)
+        self.columns = len(self.pictureData[0])
+        self.brainFuckCode = ''
+        self.movingTwice = list()
+        self.movingTwice.append(0)
+        self.movingTwice.append(1)
+        # print(self.pictureData)
+        self.getThatFuck()
+        # print("I am gonna copter your ass.")
+
+
+    def getThatFuck(self):
+        rowPointer = 0
+        columnPointer = 0
+        # print(self.rows,self.columns)
+        while (rowPointer < self.rows and columnPointer < self.columns and rowPointer >= 0 and columnPointer >= 0):
+            self.decodeColor(self.pictureData[rowPointer][columnPointer])
+            #print(self.brainFuckCode)
+            rowPointer += self.movingTwice[0]
+            columnPointer += self.movingTwice[1]
+            #print(rowPointer,columnPointer)
+
+        # print(self.brainFuckCode)
+        with open("lk.b", 'w') as file:
+            file.write(self.brainFuckCode)
+        brainFuck = BrainFuck(self.brainFuckCode)
+
+    def decodeColor(self, pixel):
+
+        mod = (-2 * pixel[0] + 3 * pixel[1] + pixel[2]) % 11
+
+        if (mod == 0):
+            self.brainFuckCode += '>'
+        if (mod == 1):
+            self.brainFuckCode += '<'
+        if (mod == 2):
+            self.brainFuckCode += '+'
+        if (mod == 3):
+            self.brainFuckCode += '-'
+        if (mod == 4):
+            self.brainFuckCode += '.'
+        if (mod == 5):
+            self.brainFuckCode += ','
+        if (mod == 6):
+            self.brainFuckCode += '['
+        if (mod == 7):
+            self.brainFuckCode += ']'
+        if (mod == 8):
+            self.turnChangers('right')
+        if (mod == 9):
+            self.turnChangers("left")
+
+    def turnChangers(self, direction):
+        if (direction == 'right'):
+            if self.movingTwice[0] == 0:
+                self.movingTwice[0] = self.movingTwice[1]
+                self.movingTwice[1] = 0
+                return
+            else:
+                self.movingTwice[1] = -self.movingTwice[0]
+                self.movingTwice[0] = 0
+                return
+        if (direction == 'left'):
+            if self.movingTwice[0] == 0:
+                self.movingTwice[0] = -self.movingTwice[1]
+                self.movingTwice[1] = 0
+                return
+            else:
+                self.movingTwice[1] = self.movingTwice[0]
+                self.movingTwice[0] = 0
+                return
 
 class Brainloller:
     def __init__(self, pictureData):

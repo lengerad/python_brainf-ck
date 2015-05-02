@@ -2,18 +2,6 @@ __author__ = 'radimsky'
 
 import sys
 
-
-def handleInput(data):
-    if ".b" in data:
-        bfCoe = BrainFuck(data)
-    elif ".png" in data:
-        from myPNGlibrary import pngHandler as handler
-
-        pictureData = handler(data).pictureArray
-        brainLoller = Braincopter(pictureData)
-    else:
-        pass
-
 class BrainFuck:
     def __init__(self, data, memoryInit=b'\x00'):
         self.memory = bytearray(memoryInit)
@@ -233,6 +221,26 @@ class Brainloller:
                 self.movingTwice[1] = self.movingTwice[0]
                 self.movingTwice[0] = 0
                 return
+
+
+def handleInput(data):
+    # print(data)
+    if ".b" in data:
+        bfCoe = BrainFuck(data)
+    elif ".png" in data:
+        from myPNGlibrary import pngHandler as handler
+
+        pictureData = handler(data).pictureArray
+        #brainLoller = Braincopter(pictureData)
+        brainLoller = Brainloller(pictureData)
+        print(brainLoller.brainFuckCode)
+    if "helloINbf.b" in data:
+        print("\nCreating png\n")
+        from bfToPNG import createPNG as writer
+
+        wr = writer(data, "loller")
+    else:
+        pass
 
 # Test run
 if __name__ == '__main__':

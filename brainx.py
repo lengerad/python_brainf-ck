@@ -239,19 +239,20 @@ class Brainloller:
 
 # Test run
 if __name__ == '__main__':
-    from optparse import OptionParser
+    import argparse
 
-    parser = OptionParser()
-    parser.add_option("-l", "--lcf", dest="pictureToInput",
+    parser = argparse.ArgumentParser(description="Arguments")
+
+    parser.add_argument("-l", "--lc2f", action="store_true", dest="pictureToInput",
                       help="Translation from given picture (BC and BL) to output or file")
-    parser.add_option("-f", "--flc", dest="textToPNG",
+    parser.add_argument("-f", "--f2lc", action="store_true", dest="textToPNG",
                       help="Translation from given picture (BC and BL) to output or file")
-    parser.add_option("-i", "--input", dest="inputFile", help="Source file with brainfuck code")
-    parser.add_option("-o", "--output", dest="outputFile", help="Destination of file to be created")
-    parser.add_option("-t", "--test", dest="testLogging", help="Adding of test output")
+    parser.add_argument("-i", "--input", nargs='+', dest="inputFile", help="Source file with brainfuck code")
+    parser.add_argument("-o", "--output", dest="outputFile", help="Destination of file to be created")
+    parser.add_argument("-t", "--test", dest="testLogging", help="Adding of test output")
 
-    (options, args) = parser.parse_args()
-
+    args = parser.parse_args()
+    # print( args)
     if ( len(sys.argv) == 1):
         print("Please input a brainfuck code. Given code will be executed (or at least, I will try)")
         inputStream = sys.stdin.read()
@@ -261,8 +262,9 @@ if __name__ == '__main__':
         result = re.match('[^"].*"$', args[0])
         brainFuck = BrainFuck(args[0])
 
-    if bool(options.pictureToInput) + bool(options.pictureToInput) > 1:
-        parser.error("Use only one switch.")
-
-    if options.pictureToInput:
+    if args.pictureToInput:
         print("yay")
+
+    if args.textToPNG:
+        print(args.inputFile)
+        print(args.outputFile)

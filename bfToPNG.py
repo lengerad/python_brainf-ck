@@ -7,48 +7,50 @@ class createPNG:
             self.bfCode = bfFile.read()
         # print(self.bfCode)
         self.option = option
-        self.createFileWithHeadder()
-        self.pictureData = []
+        self.pictureData = path
 
         if option == 'loller':
             self.lolThatCode()
             # print(self.pictureData)
-            self.file.write(self.createIHDR())
-            self.file.write(self.createIDAT())
-            self.file.write(self.createIEND())
-
+            with open("createdPNG.png", 'wb') as self.file:
+                self.file.write(b'\x89PNG\r\n\x1a\n')
+                self.file.write(self.createIHDR())
+                self.file.write(self.createIDAT())
+                self.file.write(self.createIEND())
+                print(self.createIHDR())
+                print(self.createIDAT())
+                print(self.createIEND())
         if option == 'copter':
             self.copterThatCode()
 
-    def createFileWithHeadder(self):
-        with open("createdPNG.png", 'wb') as self.file:
-            self.file.write(b'\x89PNG\r\n\x1a\n')
 
     def lolThatCode(self):
         #print(self.bfCode)
         for char in self.bfCode:
             char = chr(char)
             if (char == '>'):
-                self.pictureData += (0, (255, 0, 0))
+                self.pictureData += (255, 0, 0)
             if (char == '<'):
-                self.pictureData += (0, (128, 0, 0))
+                self.pictureData += (128, 0, 0)
             if (char == '+'):
-                self.pictureData += (0, (0, 255, 0))
+                self.pictureData += (0, 255, 0)
             if (char == '-'):
-                self.pictureData += (0, (0, 128, 0))
+                self.pictureData += (0, 128, 0)
             if (char == '.'):
-                self.pictureData += (0, (0, 0, 255))
+                self.pictureData += (0, 0, 255)
             if (char == ','):
-                self.pictureData += (0, (0, 0, 128))
+                self.pictureData += (0, 0, 128)
             if (char == '['):
-                self.pictureData += (0, (255, 255, 0))
+                self.pictureData += (255, 255, 0)
             if (char == ']'):
-                self.pictureData += (0, (128, 128, 0))
+                self.pictureData += (128, 128, 0)
 
 
     def createIHDR(self):
         chunkType = b'IHDR'
-        chunkData = bytes()
+        chunkData = bytes(
+            self.width.to_bytes(4, byteorder='big') + self.height.to_bytes(4, byteorder='big') + bytes([8]) + bytes(
+                [2]) + bytes([0]) + bytes([0]) + bytes([0]))
         chunkLength = len(chunkData)
         chunkCRC = zlib.crc32(bytes(chunkType + chunkData))
 
@@ -57,23 +59,24 @@ class createPNG:
 
     def createIDAT(self):
         chunkType = b'IDAT'
+        chunkData = bytes([0])
         for item in self.pictureData:
-            chunkData = bytes(item)
-        chunkData = zlib.compress(self.chunkData)
-        chunkLenght = len(self.chunkData)
+            chunkData += bytes(item)
+        chunkData = zlib.compress(chunkData)
+        chunkLength = len(chunkData)
         chunkCRC = zlib.crc32(bytes(chunkType + chunkData))
 
         return bytes(
-            chunkLenght.to_bytes(4, byteorder='big') + chunkType + chunkData + chunkCRC.to_bytes(4, byteorder='big'))
+            chunkLength.to_bytes(4, byteorder='big') + chunkType + chunkData + chunkCRC.to_bytes(4, byteorder='big'))
 
     def createIEND(self):
         chunkType = b'IEND'
-        chunkLenght = b'\x00\x00\x00\x00'
         chunkData = bytes()
+        chunkLength = len(chunkData)
         chunkCRC = zlib.crc32(bytes(chunkType + chunkData))
-        
+
         return bytes(
-            chunkLenght.to_bytes(4, byteorder='big') + chunkType + chunkData + chunkCRC.to_bytes(4, byteorder='big'))
+            chunkLength.to_bytes(4, byteorder='big') + chunkType + chunkData + chunkCRC.to_bytes(4, byteorder='big'))
 
 
 

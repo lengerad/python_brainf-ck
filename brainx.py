@@ -1,15 +1,28 @@
 __author__ = 'radimsky'
 
 import sys
+import re
 
 class BrainFuck:
     def __init__(self, data, memoryInit=b'\x00'):
         self.memory = bytearray(memoryInit)
         self.memory_pointer = 0
+        # print(data)
         try:
             with open(data, 'r') as file:
-                self.data = file.read()
-                self.interpretBrainfuck(self.data)
+                if ".b" in data:
+                    self.data = file.read()
+                    self.interpretBrainfuck(self.data)
+                elif ".png" in data:
+                    from myPNGlibrary import pngHandler as handler
+
+                    pictureData = handler(data).pictureArray
+                    # print(pictureData)
+                    #brainLoller = Braincopter(pictureData)
+                    brainLoller = Brainloller(pictureData)
+                else:
+                    print("Nic nedelam.")
+                    pass
         except EnvironmentError:
             self.data = data
             self.interpretBrainfuck(self.data)
@@ -223,29 +236,33 @@ class Brainloller:
                 return
 
 
-def handleInput(data):
-    # print(data)
-    if ".b" in data:
-        bfCoe = BrainFuck(data)
-    elif ".png" in data:
-        from myPNGlibrary import pngHandler as handler
-
-        pictureData = handler(data).pictureArray
-        #brainLoller = Braincopter(pictureData)
-        brainLoller = Brainloller(pictureData)
-        print(brainLoller.brainFuckCode)
-    if "helloINbf.b" in data:
-        print("\nCreating png\n")
-        from bfToPNG import createPNG as writer
-
-        wr = writer(data, "loller")
-    else:
-        pass
 
 # Test run
 if __name__ == '__main__':
-    if ( len(sys.argv) < 2):
-        data = '++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.'
-        bfCode = BrainFuck(data)
-    else:
-        handleInput(sys.argv[1])
+    from optparse import OptionParser
+
+    parser = OptionParser()
+    parser.add_option("-l", "--lcf", dest="pictureToInput",
+                      help="Translation from given picture (BC and BL) to output or file")
+    parser.add_option("-f", "--flc", dest="textToPNG",
+                      help="Translation from given picture (BC and BL) to output or file")
+    parser.add_option("-i", "--input", dest="inputFile", help="Source file with brainfuck code")
+    parser.add_option("-o", "--output", dest="outputFile", help="Destination of file to be created")
+    parser.add_option("-t", "--test", dest="testLogging", help="Adding of test output")
+
+    (options, args) = parser.parse_args()
+
+    if ( len(sys.argv) == 1):
+        print("Please input a brainfuck code. Given code will be executed (or at least, I will try)")
+        inputStream = sys.stdin.read()
+        print("\nGiven code in brainfuck:")
+        brainFuck = BrainFuck(inputStream)
+    if ( len(sys.argv) == 2):
+        result = re.match('[^"].*"$', args[0])
+        brainFuck = BrainFuck(args[0])
+
+    if bool(options.pictureToInput) + bool(options.pictureToInput) > 1:
+        parser.error("Use only one switch.")
+
+    if options.pictureToInput:
+        print("yay")

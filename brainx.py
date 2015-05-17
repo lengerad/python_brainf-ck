@@ -7,26 +7,7 @@ class BrainFuck:
     def __init__(self, data, memoryInit=b'\x00'):
         self.memory = bytearray(memoryInit)
         self.memory_pointer = 0
-        # print(data)
-        try:
-            with open(data, 'r') as file:
-                if ".b" in data:
-                    self.data = file.read()
-                    self.interpretBrainfuck(self.data)
-                elif ".png" in data:
-                    from myPNGlibrary import pngHandler as handler
-
-                    pictureData = handler(data).pictureArray
-                    # print(pictureData)
-                    #brainLoller = Braincopter(pictureData)
-                    brainLoller = Brainloller(pictureData)
-                else:
-                    print("Nic nedelam.")
-                    pass
-        except EnvironmentError:
-            self.data = data
-            self.interpretBrainfuck(self.data)
-
+        self.data = data
 
     def interpretBrainfuck(self, data):
 
@@ -190,7 +171,7 @@ class Brainloller:
             #print(rowPointer,columnPointer)
 
         # print(self.brainFuckCode)
-        brainFuck = BrainFuck(self.brainFuckCode)
+            # brainFuck = BrainFuck(self.brainFuckCode)
 
     def decodeColor(self, pixel):
         if (pixel == (255, 0, 0)):
@@ -256,11 +237,34 @@ if __name__ == '__main__':
         print("\nGiven code in brainfuck:")
         brainFuck = BrainFuck(inputStream)
     if ( len(sys.argv) == 2):
-        print(sys.argv[1])
+        #print(sys.argv[1])
         if ".b" in sys.argv[1]:
-            print("Kedlubna")
+            print("Brainfuck code given in source file", sys.argv[1], "will be interpreted.")
+            with open(sys.argv[1], 'r') as file:
+                brainFuck = BrainFuck(file.read())
+                brainFuck.interpretBrainfuck(brainFuck.data)
+                print("\n")
+                exit(0)
         elif ".png" in sys.argv[1]:
-            print("Brambora")
+            from myPNGlibrary import pngHandler as handler
+
+            handler = handler(sys.argv[1])
+            if (handler.pictureType == "loler"):
+                print("Brainfuck code given in source file", sys.argv[1],
+                      "will be interpreted and is recogized as Brainloller.")
+                brainLoler = Brainloller(handler.pictureArray)
+                brainFuck = BrainFuck(brainLoler.brainFuckCode)
+                brainFuck.interpretBrainfuck(brainFuck.data)
+                print("\n")
+                exit(0)
+            if (handler.pictureType == "koptera"):
+                print("Brainfuck code given in source file", sys.argv[1],
+                      "will be interpreted and is recogized as Braincopter.")
+                brainCopter = Braincopter(handler.pictureArray)
+                brainFuck = BrainFuck(brainCopter.brainFuckCode)
+                brainFuck.interpretBrainfuck(brainFuck.data)
+                print("\n")
+                exit(0)
         else:
             print("What you just gave me? I don't know what to do with it!")
             exit(1)

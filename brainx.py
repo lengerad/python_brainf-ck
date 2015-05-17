@@ -101,7 +101,6 @@ class Braincopter:
         self.movingTwice = list()
         self.movingTwice.append(0)
         self.movingTwice.append(1)
-        # print(self.pictureData)
         self.getThatFuck()
         # print("I am gonna copter your ass.")
 
@@ -109,7 +108,7 @@ class Braincopter:
     def getThatFuck(self):
         rowPointer = 0
         columnPointer = 0
-        # print(self.rows,self.columns)
+        #print(self.rows,self.columns)
         while (rowPointer < self.rows and columnPointer < self.columns and rowPointer >= 0 and columnPointer >= 0):
             self.decodeColor(self.pictureData[rowPointer][columnPointer])
             #print(self.brainFuckCode)
@@ -118,9 +117,9 @@ class Braincopter:
             #print(rowPointer,columnPointer)
 
         # print(self.brainFuckCode)
-        with open("lk.b", 'w') as file:
-            file.write(self.brainFuckCode)
-        brainFuck = BrainFuck(self.brainFuckCode)
+            # with open("lk.b", 'w') as file:
+            #    file.write(self.brainFuckCode)
+            #brainFuck = BrainFuck(self.brainFuckCode)
 
     def decodeColor(self, pixel):
 
@@ -243,7 +242,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="Arguments")
 
-    parser.add_argument("-l", "--lc2f", action="store_true", dest="pictureToInput",
+    parser.add_argument("-l", "--lc2f", nargs="+", dest="pictureToInput",
                       help="Translation from given picture (BC and BL) to output or file")
     parser.add_argument("-f", "--f2lc", action="store_true", dest="textToPNG",
                       help="Translation from given picture (BC and BL) to output or file")
@@ -251,19 +250,42 @@ if __name__ == '__main__':
     parser.add_argument("-o", "--output", dest="outputFile", help="Destination of file to be created")
     parser.add_argument("-t", "--test", dest="testLogging", help="Adding of test output")
 
-    args = parser.parse_args()
-    # print( args)
     if ( len(sys.argv) == 1):
         print("Please input a brainfuck code. Given code will be executed (or at least, I will try)")
         inputStream = sys.stdin.read()
         print("\nGiven code in brainfuck:")
         brainFuck = BrainFuck(inputStream)
     if ( len(sys.argv) == 2):
-        result = re.match('[^"].*"$', args[0])
-        brainFuck = BrainFuck(args[0])
+        print(sys.argv[1])
+        if ".b" in sys.argv[1]:
+            print("Kedlubna")
+        elif ".png" in sys.argv[1]:
+            print("Brambora")
+        else:
+            print("What you just gave me? I don't know what to do with it!")
+            exit(1)
+
+    args = parser.parse_args()
 
     if args.pictureToInput:
-        print("yay")
+
+        inputPicture = args.pictureToInput[0]
+        outputFile = args.pictureToInput[1]
+        # print(inputPicture, outputFile)
+        print("With option: --lc2f starting translation from picture", inputPicture,
+              "to brainfuck code.\nBrainfuck code will be saved to", outputFile, ".")
+        from myPNGlibrary import pngHandler as handler
+
+        handler = handler(inputPicture)
+        if (handler.pictureType == "loler"):
+            brainLoler = Brainloller(handler.pictureArray)
+            with open(outputFile, 'w') as file:
+                file.write(brainLoler.brainFuckCode)
+        if (handler.pictureType == "koptera"):
+            brainCopter = Braincopter(handler.pictureArray)
+            with open(outputFile, 'w') as file:
+                file.write(brainCopter.brainFuckCode)
+        exit(0)
 
     if args.textToPNG:
         print(args.inputFile)

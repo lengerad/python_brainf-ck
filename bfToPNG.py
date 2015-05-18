@@ -11,9 +11,7 @@ class createPNG:
         # print(len(self.bfCode))
         self.option = option
         self.pictureData = []
-        self.pngData = pngHandler.pictureArray
-        print(outfile)
-
+        # print(outfile)
 
         # print(self.pictureData)
         with open(outfile, 'wb') as self.file:
@@ -24,6 +22,7 @@ class createPNG:
                 self.width = self.height + 2
                 self.createArray(self.lolThatCode)
             elif (option == "copter"):
+                self.pngData = pngHandler.pictureArray
                 self.height = math.ceil(math.sqrt(len(self.bfCode)))
                 self.width = self.height + 2
                 self.createArray(self.copterThatCode)
@@ -32,9 +31,9 @@ class createPNG:
             self.file.write(self.createIDAT())
             self.file.write(self.createIEND())
 
-    def copterThatCode(self, char, pixel):
+    def copterThatCode(self, char, i, j):
         # print(pixel)
-        pixelValue = (-2 * pixel[0] + 3 * pixel[1] + pixel[2]) % 11
+        pixelValue = (-2 * self.pngData[i][j][0] + 3 * self.pngData[i][j][1] + self.pngData[i][j][2]) % 11
         if (char == '>'):
             tempVal = 0
         elif (char == '<'):
@@ -58,14 +57,14 @@ class createPNG:
         elif (char == 'nop'):
             tempVal = 10
 
-        blueColor = (pixel[2] - (11 - (tempVal - pixelValue) % 11))
+        blueColor = (self.pngData[i][j][2] - (11 - (tempVal - pixelValue) % 11))
         if (blueColor < 0):
             blueColor += 11
 
-        return (pixel[0], pixel[1], blueColor)
+        return (self.pngData[i][j][0], self.pngData[i][j][1], blueColor)
 
 
-    def lolThatCode(self, char, pixel=0):
+    def lolThatCode(self, char, i=0, j=0):
         #print(self.bfCode)
         if (char == '>'):
             return (255, 0, 0)
@@ -96,32 +95,31 @@ class createPNG:
         direction = 1
         i = 0
         j = 0
-        pixel = self.pngData
         while (1):
             if (j == self.width - 1):
                 if (i == self.height - 1):
-                    self.pictureArray[i][j] = translator("nop", pixel[i][j])
+                    self.pictureArray[i][j] = translator("nop", i, j)
                     break
-                self.pictureArray[i][j] = translator("right", pixel[i][j])
+                self.pictureArray[i][j] = translator("right", i, j)
                 i += 1;
-                self.pictureArray[i][j] = translator("right", pixel[i][j])
+                self.pictureArray[i][j] = translator("right", i, j)
                 direction = -1
                 j += direction
                 continue
             if (j == 0 and i != 0):
                 if (i == self.height - 1):
-                    self.pictureArray[i][j] = translator("nop", pixel[i][j])
+                    self.pictureArray[i][j] = translator("nop", i, j)
                     break
-                self.pictureArray[i][j] = translator("left", pixel[i][j])
+                self.pictureArray[i][j] = translator("left", i, j)
                 i += 1;
-                self.pictureArray[i][j] = translator("left", pixel[i][j])
+                self.pictureArray[i][j] = translator("left", i, j)
                 direction = 1
                 j += direction
                 continue
             if (charPointer >= len(self.bfCode)):
-                self.pictureArray[i][j] = translator("nop", pixel[i][j])
+                self.pictureArray[i][j] = translator("nop", i, j)
             else:
-                self.pictureArray[i][j] = translator(self.bfCode[charPointer], pixel[i][j])
+                self.pictureArray[i][j] = translator(self.bfCode[charPointer], i, j)
             j += direction
             charPointer += 1;
 

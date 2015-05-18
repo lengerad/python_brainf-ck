@@ -264,9 +264,6 @@ if __name__ == '__main__':
                 brainFuck.interpretBrainfuck(brainFuck.data)
                 print("\n")
                 exit(0)
-        else:
-            print("What you just gave me? I don't know what to do with it!")
-            exit(1)
 
     args = parser.parse_args()
 
@@ -297,16 +294,12 @@ if __name__ == '__main__':
 
             handler = handler(args.inputFile[0], 'loller', args.outputFile)
         elif (len(args.inputFile) == 2):
-            print(args.inputFile[0])
-            print(args.inputFile[1])
+            # print(args.inputFile[0])
+            #print(args.inputFile[1])
             from myPNGlibrary import pngHandler
-
             pngHandler = pngHandler(args.inputFile[1])
 
-            # print(pngHandler.pictureArray)
-
             from bfToPNG import createPNG
-            #def __init__(self, inFileBF, option, outfile, pngData, inFilePicture):
             handler = createPNG(args.inputFile[0], 'copter', args.outputFile, pngHandler, args.inputFile[1])
         else:
             print("Too many arguments.")

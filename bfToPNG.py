@@ -13,7 +13,6 @@ class createPNG:
         self.pictureData = []
 
         if option == 'loller':
-            self.lolThatCode()
             # print(self.pictureData)
             with open(outfile, 'wb') as self.file:
                 self.file.write(b'\x89PNG\r\n\x1a\n')
@@ -22,6 +21,7 @@ class createPNG:
                 # Pridam si dva slouce pro otaceni
                 self.height = math.ceil(math.sqrt(len(self.bfCode)))
                 self.width = self.height + 2
+                self.createArray()
                 self.file.write(self.createIHDR())
                 self.file.write(self.createIDAT())
                 self.file.write(self.createIEND())
@@ -31,33 +31,69 @@ class createPNG:
             self.copterThatCode()
 
 
-    def lolThatCode(self):
+    def lolThatCode(self, char):
         #print(self.bfCode)
+        if (char == '>'):
+            return (255, 0, 0)
+        elif (char == '<'):
+            return (128, 0, 0)
+        elif (char == '+'):
+            return (0, 255, 0)
+        elif (char == '-'):
+            return (0, 128, 0)
+        elif (char == '.'):
+            return (0, 0, 255)
+        elif (char == ','):
+            return (0, 0, 128)
+        elif (char == '['):
+            return (255, 255, 0)
+        elif (char == ']'):
+            return (128, 128, 0)
+        elif (char == 'left'):
+            return (0, 128, 128)
+        elif (char == 'right'):
+            return (0, 255, 255)
+        elif (char == 'nop'):
+            return (0, 0, 0)
+
+    def createArray(self):
+        self.pictureArray = [[0 for i in range(self.width)] for i in range(self.height)]
+        charPointer = 0;
+        direction = 1
         i = 0
-        for char in self.bfCode:
-            char = char
-            if (char == '>'):
-                self.pictureData += (255, 0, 0)
-            elif (char == '<'):
-                self.pictureData += (128, 0, 0)
-            elif (char == '+'):
-                self.pictureData += (0, 255, 0)
-            elif (char == '-'):
-                self.pictureData += (0, 128, 0)
-            elif (char == '.'):
-                self.pictureData += (0, 0, 255)
-            elif (char == ','):
-                self.pictureData += (0, 0, 128)
-            elif (char == '['):
-                self.pictureData += (255, 255, 0)
-            elif (char == ']'):
-                self.pictureData += (128, 128, 0)
-            elif (char == 'left'):
-                self.pictureData += (0, 128, 128)
-            elif (char == 'right'):
-                self.pictureData += (255, 255, 0)
-            elif (char == 'nop'):
-                self.pictureData += (0, 0, 0)
+        j = 0
+
+        while (1):
+            if (j == self.width - 1):
+                if (i == self.height - 1):
+                    self.pictureArray[i][j] = self.lolThatCode("nop")
+                    break
+                self.pictureArray[i][j] = self.lolThatCode("right")
+                i += 1;
+                self.pictureArray[i][j] = self.lolThatCode("right")
+                direction = -1
+                j += direction
+                continue
+            if (j == 0 and i != 0):
+                if (i == self.height - 1):
+                    self.pictureArray[i][j] = self.lolThatCode("nop")
+                    break
+                self.pictureArray[i][j] = self.lolThatCode("left")
+                i += 1;
+                self.pictureArray[i][j] = self.lolThatCode("left")
+                direction = 1
+                j += direction
+                continue
+            if (charPointer >= len(self.bfCode)):
+                self.pictureArray[i][j] = self.lolThatCode("nop")
+            else:
+                self.pictureArray[i][j] = self.lolThatCode(self.bfCode[charPointer])
+            j += direction
+            charPointer += 1;
+
+
+            # print(self.height, self.width)
+            #print(i,j)
 
     def createIHDR(self):
         chunkType = b'IHDR'
@@ -73,12 +109,13 @@ class createPNG:
     def createIDAT(self):
         chunkType = b'IDAT'
         chunkData = bytearray()
-        chunkData += b'\x00'
-
-        for item in self.pictureData:
-            # print(item)
-            chunkData.append(item)
-
+        # print(self.pictureArray)
+        for row in self.pictureArray:
+            chunkData += b'\x00'
+            for column in row:
+                chunkData.append(column[0])
+                chunkData.append(column[1])
+                chunkData.append(column[2])
         chunkData = zlib.compress(chunkData)
         chunkLength = len(chunkData)
         chunkCRC = zlib.crc32(bytes(chunkType + chunkData))
@@ -99,18 +136,18 @@ class createPNG:
         for char in self.bfCode:
             char = chr(char)
             if (char == '>'):
-                self.pictureData += 1
+                return 1
             if (char == '<'):
-                self.pictureData += 2
+                return 2
             if (char == '+'):
-                self.pictureData += 3
+                return 3
             if (char == '-'):
-                self.pictureData += 4
+                return 4
             if (char == '.'):
-                self.pictureData += 5
+                return 5
             if (char == ','):
-                self.pictureData += 6
+                return 6
             if (char == '['):
-                self.pictureData += 7
+                return 7
             if (char == ']'):
-                self.pictureData += 8
+                return 8

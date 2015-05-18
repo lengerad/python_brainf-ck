@@ -102,7 +102,6 @@ class Braincopter:
             #brainFuck = BrainFuck(self.brainFuckCode)
 
     def decodeColor(self, pixel):
-
         mod = (-2 * pixel[0] + 3 * pixel[1] + pixel[2]) % 11
 
         if (mod == 0):
@@ -285,6 +284,7 @@ if __name__ == '__main__':
             brainLoler = Brainloller(handler.pictureArray)
             with open(outputFile, 'w') as file:
                 file.write(brainLoler.brainFuckCode)
+
         if (handler.pictureType == "koptera"):
             brainCopter = Braincopter(handler.pictureArray)
             with open(outputFile, 'w') as file:
@@ -292,8 +292,23 @@ if __name__ == '__main__':
         exit(0)
 
     if args.textToPNG:
-        from bfToPNG import createPNG as handler
+        if (len(args.inputFile) == 1):
+            from bfToPNG import createPNG as handler
 
-        handler = handler(args.inputFile[0], 'loller', args.outputFile)
-        print(args.inputFile[0])
-        print(args.outputFile)
+            handler = handler(args.inputFile[0], 'loller', args.outputFile)
+        elif (len(args.inputFile) == 2):
+            print(args.inputFile[0])
+            print(args.inputFile[1])
+            from myPNGlibrary import pngHandler
+
+            pngHandler = pngHandler(args.inputFile[1])
+
+            # print(pngHandler.pictureArray)
+
+            from bfToPNG import createPNG
+            #def __init__(self, inFileBF, option, outfile, pngData, inFilePicture):
+            handler = createPNG(args.inputFile[0], 'copter', args.outputFile, pngHandler, args.inputFile[1])
+        else:
+            print("Too many arguments.")
+            exit(1)
+

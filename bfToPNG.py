@@ -3,35 +3,69 @@ import zlib
 import math
 
 class createPNG:
-    def __init__(self, inFile, option, outfile):
-        with open(inFile, 'r') as bfFile:
+    def __init__(self, inFileBF, option, outfile, pngHandler="", inFilePicture=""):
+        with open(inFileBF, 'r') as bfFile:
             self.bfCode = bfFile.read()
 
         self.bfCode = ''.join(self.bfCode.split())
         # print(len(self.bfCode))
         self.option = option
         self.pictureData = []
+        self.pngData = pngHandler.pictureArray
+        print(outfile)
 
-        if option == 'loller':
-            # print(self.pictureData)
-            with open(outfile, 'wb') as self.file:
-                self.file.write(b'\x89PNG\r\n\x1a\n')
-                # self.width = len(self.bfCode)
-                #self.height = 1
-                # Pridam si dva slouce pro otaceni
+
+        # print(self.pictureData)
+        with open(outfile, 'wb') as self.file:
+            self.file.write(b'\x89PNG\r\n\x1a\n')
+            # Pridam si dva slouce pro otaceni
+            if (option == "loller"):
                 self.height = math.ceil(math.sqrt(len(self.bfCode)))
                 self.width = self.height + 2
-                self.createArray()
-                self.file.write(self.createIHDR())
-                self.file.write(self.createIDAT())
-                self.file.write(self.createIEND())
-                # with open(outfile, 'rb') as self.file:
-                #   print(self.file.read())
-        if option == 'copter':
-            self.copterThatCode()
+                self.createArray(self.lolThatCode)
+            elif (option == "copter"):
+                self.height = math.ceil(math.sqrt(len(self.bfCode)))
+                self.width = self.height + 2
+                self.createArray(self.copterThatCode)
+
+            self.file.write(self.createIHDR())
+            self.file.write(self.createIDAT())
+            self.file.write(self.createIEND())
+
+    def copterThatCode(self, char, pixel):
+        # print(pixel)
+        pixelValue = (-2 * pixel[0] + 3 * pixel[1] + pixel[2]) % 11
+        if (char == '>'):
+            tempVal = 0
+        elif (char == '<'):
+            tempVal = 1
+        elif (char == '+'):
+            tempVal = 2
+        elif (char == '-'):
+            tempVal = 3
+        elif (char == '.'):
+            tempVal = 4
+        elif (char == ','):
+            tempVal = 5
+        elif (char == '['):
+            tempVal = 6
+        elif (char == ']'):
+            tempVal = 7
+        elif (char == 'right'):
+            tempVal = 8
+        elif (char == 'left'):
+            tempVal = 9
+        elif (char == 'nop'):
+            tempVal = 10
+
+        blueColor = (pixel[2] - (11 - (tempVal - pixelValue) % 11))
+        if (blueColor < 0):
+            blueColor += 11
+
+        return (pixel[0], pixel[1], blueColor)
 
 
-    def lolThatCode(self, char):
+    def lolThatCode(self, char, pixel=0):
         #print(self.bfCode)
         if (char == '>'):
             return (255, 0, 0)
@@ -56,38 +90,38 @@ class createPNG:
         elif (char == 'nop'):
             return (0, 0, 0)
 
-    def createArray(self):
+    def createArray(self, translator):
         self.pictureArray = [[0 for i in range(self.width)] for i in range(self.height)]
         charPointer = 0;
         direction = 1
         i = 0
         j = 0
-
+        pixel = self.pngData
         while (1):
             if (j == self.width - 1):
                 if (i == self.height - 1):
-                    self.pictureArray[i][j] = self.lolThatCode("nop")
+                    self.pictureArray[i][j] = translator("nop", pixel[i][j])
                     break
-                self.pictureArray[i][j] = self.lolThatCode("right")
+                self.pictureArray[i][j] = translator("right", pixel[i][j])
                 i += 1;
-                self.pictureArray[i][j] = self.lolThatCode("right")
+                self.pictureArray[i][j] = translator("right", pixel[i][j])
                 direction = -1
                 j += direction
                 continue
             if (j == 0 and i != 0):
                 if (i == self.height - 1):
-                    self.pictureArray[i][j] = self.lolThatCode("nop")
+                    self.pictureArray[i][j] = translator("nop", pixel[i][j])
                     break
-                self.pictureArray[i][j] = self.lolThatCode("left")
+                self.pictureArray[i][j] = translator("left", pixel[i][j])
                 i += 1;
-                self.pictureArray[i][j] = self.lolThatCode("left")
+                self.pictureArray[i][j] = translator("left", pixel[i][j])
                 direction = 1
                 j += direction
                 continue
             if (charPointer >= len(self.bfCode)):
-                self.pictureArray[i][j] = self.lolThatCode("nop")
+                self.pictureArray[i][j] = translator("nop", pixel[i][j])
             else:
-                self.pictureArray[i][j] = self.lolThatCode(self.bfCode[charPointer])
+                self.pictureArray[i][j] = translator(self.bfCode[charPointer], pixel[i][j])
             j += direction
             charPointer += 1;
 
@@ -130,24 +164,3 @@ class createPNG:
         chunkCRC = zlib.crc32(bytes(chunkType + chunkData))
 
         return b'\x00\x00\x00\x00IEND\xaeB`\x82'
-
-
-    def copterThatCode(self):
-        for char in self.bfCode:
-            char = chr(char)
-            if (char == '>'):
-                return 1
-            if (char == '<'):
-                return 2
-            if (char == '+'):
-                return 3
-            if (char == '-'):
-                return 4
-            if (char == '.'):
-                return 5
-            if (char == ','):
-                return 6
-            if (char == '['):
-                return 7
-            if (char == ']'):
-                return 8

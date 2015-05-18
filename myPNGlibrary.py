@@ -39,11 +39,11 @@ class pngHandler():
     def recognizePicture(self):
         for i in range(0, self.imageHeight):
             for j in range(0, self.imageWidth):
-                sumPixel = self.pictureArray[i][j][0] + self.pictureArray[i][j][1] + self.pictureArray[i][j][2]
-                if (self.pictureArray[i][j][0] != 255 and self.pictureArray[i][j][0] != 128 and self.pictureArray[i][j][
-                    0] != 0):
-                    self.pictureType = "koptera"
-                    return
+                for x in range(0, 3):
+                    if (self.pictureArray[i][j][x] != 255 and self.pictureArray[i][j][x] != 128 and
+                                self.pictureArray[i][j][x] != 0):
+                        self.pictureType = "koptera"
+                        return
         self.pictureType = "loler"
 
 

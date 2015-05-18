@@ -10,7 +10,6 @@ class BrainFuck:
         self.data = data
 
     def interpretBrainfuck(self, data):
-
         # Method pointer
         # cannot mix self.memory_pointer and current pointer
         pointer = 0
@@ -242,8 +241,9 @@ if __name__ == '__main__':
             print("Brainfuck code given in source file", sys.argv[1], "will be interpreted.")
             with open(sys.argv[1], 'r') as file:
                 brainFuck = BrainFuck(file.read())
+                print(brainFuck.data)
                 brainFuck.interpretBrainfuck(brainFuck.data)
-                print("\n")
+
                 exit(0)
         elif ".png" in sys.argv[1]:
             from myPNGlibrary import pngHandler as handler
@@ -292,5 +292,8 @@ if __name__ == '__main__':
         exit(0)
 
     if args.textToPNG:
-        print(args.inputFile)
+        from bfToPNG import createPNG as handler
+
+        handler = handler(args.inputFile[0], 'loller', args.outputFile)
+        print(args.inputFile[0])
         print(args.outputFile)

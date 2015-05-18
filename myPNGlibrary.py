@@ -12,7 +12,6 @@ class PNGNotImplementedError(Exception):
 
 
 class pngHandler():
-
     def __init__(self, path):
         with open(path, 'rb') as file:
             self.binaryData = file.read()
@@ -77,7 +76,6 @@ class pngHandler():
         for chunk in self.pngData:
             if chunk['chunkType'] == b'IDAT':
                 tempData += chunk['chunkData']
-
         self.decompressedData = zlib.decompress(tempData)
 
     def reconstructPixel(self, filterType, pixel):
@@ -139,6 +137,7 @@ class pngHandler():
                 if i > 0 and j > 0:
                     self.c = self.pictureArray[i - 1][j - 1]
                 pixel = (
-                self.decompressedData[pointer], self.decompressedData[pointer + 1], self.decompressedData[pointer + 2])
+                    self.decompressedData[pointer], self.decompressedData[pointer + 1],
+                    self.decompressedData[pointer + 2])
                 self.pictureArray[i][j] = self.reconstructPixel(filter, pixel)
                 pointer += 3

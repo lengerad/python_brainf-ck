@@ -1,7 +1,5 @@
 __author__ = 'radimsky'
-import zlib
-import sys
-
+import zlib, traceback, sys
 
 class PNGWrongHeaderError(Exception):
     pass
@@ -30,8 +28,11 @@ class pngHandler():
 
     def checkHeader(self, binaryData):
         if binaryData[:8] != b'\x89PNG\r\n\x1a\n':
-            raise PNGWrongHeaderError()
-            sys.exit(4)
+            try:
+                raise PNGNotImplementedError()
+            except:
+                traceback.print_exc(file=sys.stderr)
+                sys.exit(8)
         else:
             self.binaryData = binaryData[8:]
             return self
@@ -68,8 +69,11 @@ class pngHandler():
                 controlBytes = int.from_bytes(chunk['chunkData'][9:13], byteorder='big', signed='False')
 
         if controlBytes != 33554432:
-            raise PNGNotImplementedError
-            sys.exit(8)
+            try:
+                raise PNGNotImplementedError()
+            except:
+                traceback.print_exc(file=sys.stderr)
+                sys.exit(8)
 
     def getIDATData(self):
         tempData = b''

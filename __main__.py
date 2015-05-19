@@ -5,13 +5,19 @@ import sys
 import re
 
 class BrainFuck:
-    def __init__(self, data, memoryPointer=0, memoryField=bytearray(b'\x00'), test=0):
+    def __init__(self, data, memoryPointer, memoryField, test=0):
         self.memory = memoryField
         # print("----------------------------------------")
         self.memory_pointer = int(memoryPointer)
         self.data = data
         self.test = test
-        self.output = bytes()
+        self.output = bytearray()
+        self.logFileNumber = 1
+        index = self.data.find('!')
+        self.input = []
+        if index != -1:
+            self.input = (self.data[index + 1:])
+            self.data = self.data[:index]
         #print(self.memory)
 
 
@@ -58,10 +64,18 @@ class BrainFuck:
             if data[pointer] == '.' :
                 sys.stdout.write(chr(self.memory[self.memory_pointer]))
                 sys.stdout.flush()
-                self.output.append(chr(self.memory[self.memory_pointer]))
+                self.output.append(self.memory[self.memory_pointer])
 
             if data[pointer] == ',':
-                self.memory[self.memory_pointer] = ord(sys.stdin.read(1))
+                if (len(self.input) != 0):
+                    # print("sem")
+                    self.memory[self.memory_pointer] = ord(self.input[0])
+                    self.input = self.input[1:]
+                else:
+                    self.memory[self.memory_pointer] = ord(sys.stdin.read(1))
+
+            if data[pointer] == '#':
+                self.fileLogging()
 
             pointer += 1
 
@@ -78,14 +92,16 @@ class BrainFuck:
         # code inside brackets
         return (data[1:endOfLoop-1])
 
-    def fileLogging(self, fileNumber):
-        fileName = "debug_" + "{:0>2d}".format(fileNumber) + ".log"
+    def fileLogging(self):
+        fileName = "debug_" + "{:0>2d}".format(self.logFileNumber) + ".log"
         with open(fileName, "w") as file:
             sys.stdout = file
-            print("# program data" + "\n" + self.data + "\n" + "\n", end='')
+            print("# program data" + "\n" + ''.join(self.data.split()) + "\n" + "\n", end='')
             print("# memory" + "\n" + str(bytes(self.memory)) + "\n", end='')
             print("\n" + "# memory pointer" + "\n" + str(self.memory_pointer) + "\n" + "\n", end='')
-            print("# output" + "\n" + str(self.output) + "\n\n", end='')
+            print("# output" + "\n" + str(bytes(self.output)) + "\n\n", end='')
+        self.logFileNumber += 1
+        sys.stdout = sys.__stdout__
 
 
 class Braincopter:
@@ -232,7 +248,7 @@ class Brainloller:
 
 # Test run
 if __name__ == '__main__':
-    import argparse
+    import argparse, traceback
 
     parser = argparse.ArgumentParser(description="Arguments")
 
@@ -256,7 +272,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     defaultPointer = 0
-    defaultMemory = bytearray()
+    defaultMemory = bytearray(b'\x00')
     test = 0
 
     if args.memoryPointer:
@@ -264,14 +280,15 @@ if __name__ == '__main__':
 
     if args.memoryState:
         # print(args.memoryState)
+        defaultMemory = bytearray()
         args.memoryState = args.memoryState.replace('\'', '')
         test = args.memoryState.split('\\x')
-
         number = ""
         for char in test:
             if (char != 'b'):
                 number = int(char, 16)
                 defaultMemory.append(number)
+                #        print("WHAT")
 
     if args.testLogging:
         test = 1
@@ -287,7 +304,7 @@ if __name__ == '__main__':
                 #print(brainFuck.data)
                 brainFuck.interpretBrainfuck(brainFuck.data)
 
-                exit(0)
+
         elif ".png" in args.FILE:
             from myPNGlibrary import pngHandler as handler
             handler = handler(args.FILE)
@@ -298,20 +315,28 @@ if __name__ == '__main__':
                 brainFuck = BrainFuck(brainLoler.brainFuckCode, defaultPointer, defaultMemory, test)
                 brainFuck.interpretBrainfuck(brainFuck.data)
                 #print("\n")
-                exit(0)
+
             if (handler.pictureType == "koptera"):
                 #print("Brainfuck code given in source file", args.FILE,"will be interpreted and is recogized as Braincopter.")
                 brainCopter = Braincopter(handler.pictureArray)
                 brainFuck = BrainFuck(brainCopter.brainFuckCode, defaultPointer, defaultMemory, test)
                 brainFuck.interpretBrainfuck(brainFuck.data)
                 #print("\n")
-                exit(0)
-        else:
+        elif "\"" in args.FILE:
             args.FILE = args.FILE.replace("\"", "")
             brainFuck = BrainFuck(args.FILE, defaultPointer, defaultMemory, test)
             brainFuck.interpretBrainfuck(brainFuck.data)
-            if (args.testLogging):
-                brainFuck.fileLogging(1)
+
+        else:
+            import myPNGlibrary
+
+            try:
+                raise myPNGlibrary.PNGWrongHeaderError
+            except:
+                traceback.print_exc(file=sys.stderr)
+                sys.exit(4)
+        if (args.testLogging):
+            brainFuck.fileLogging()
 
     if args.pictureToInput:
 

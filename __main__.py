@@ -5,11 +5,13 @@ import sys
 import re
 
 class BrainFuck:
-    def __init__(self, data, memoryPointer=0, memoryField=bytearray(b'\x00')):
+    def __init__(self, data, memoryPointer=0, memoryField=bytearray(b'\x00'), test=0):
         self.memory = memoryField
         # print("----------------------------------------")
         self.memory_pointer = int(memoryPointer)
         self.data = data
+        self.test = test
+        self.output = bytes()
         #print(self.memory)
 
 
@@ -56,6 +58,7 @@ class BrainFuck:
             if data[pointer] == '.' :
                 sys.stdout.write(chr(self.memory[self.memory_pointer]))
                 sys.stdout.flush()
+                self.output.append(chr(self.memory[self.memory_pointer]))
 
             if data[pointer] == ',':
                 self.memory[self.memory_pointer] = ord(sys.stdin.read(1))
@@ -74,6 +77,15 @@ class BrainFuck:
 
         # code inside brackets
         return (data[1:endOfLoop-1])
+
+    def fileLogging(self, fileNumber):
+        fileName = "debug_" + "{:0>2d}".format(fileNumber) + ".log"
+        with open(fileName, "w") as file:
+            sys.stdout = file
+            print("# program data" + "\n" + self.data + "\n" + "\n", end='')
+            print("# memory" + "\n" + str(bytes(self.memory)) + "\n", end='')
+            print("\n" + "# memory pointer" + "\n" + str(self.memory_pointer) + "\n" + "\n", end='')
+            print("# output" + "\n" + str(self.output) + "\n\n", end='')
 
 
 class Braincopter:
@@ -217,6 +229,7 @@ class Brainloller:
                 self.movingTwice[0] = 0
                 return
 
+
 # Test run
 if __name__ == '__main__':
     import argparse
@@ -235,15 +248,16 @@ if __name__ == '__main__':
     parser.add_argument("FILE", nargs='?', help="No argument, just input file")
 
     if ( len(sys.argv) == 1):
-        print("Please input a brainfuck code. Given code will be executed (or at least, I will try)")
+        #print("Please input a brainfuck code. Given code will be executed (or at least, I will try)")
         inputStream = sys.stdin.read()
-        print("\nGiven code in brainfuck:")
+        #print("\nGiven code in brainfuck:")
         brainFuck = BrainFuck(inputStream)
 
     args = parser.parse_args()
 
     defaultPointer = 0
     defaultMemory = bytearray()
+    test = 0
 
     if args.memoryPointer:
         defaultPointer = args.memoryPointer.encode('utf-8')
@@ -259,55 +273,52 @@ if __name__ == '__main__':
                 number = int(char, 16)
                 defaultMemory.append(number)
 
+    if args.testLogging:
+        test = 1
+
     if args.FILE:
-        # print(args.FILE)
+        #print(args.FILE)
         #print(defaultMemory)
         #print(defaultPointer)
         if ".b" in args.FILE:
-            print("Brainfuck code given in source file", args.FILE, "will be interpreted.")
+            #print("Brainfuck code given in source file", args.FILE, "will be interpreted.")
             with open(args.FILE, 'r') as file:
-                brainFuck = BrainFuck(file.read(), defaultPointer, defaultMemory)
+                brainFuck = BrainFuck(file.read(), defaultPointer, defaultMemory, test)
                 #print(brainFuck.data)
                 brainFuck.interpretBrainfuck(brainFuck.data)
 
                 exit(0)
         elif ".png" in args.FILE:
             from myPNGlibrary import pngHandler as handler
-
             handler = handler(args.FILE)
 
             if (handler.pictureType == "loler"):
-                print("Brainfuck code given in source file", args.FILE,
-                      "will be interpreted and is recogized as Brainloller.")
+                #print("Brainfuck code given in source file", args.FILE,"will be interpreted and is recogized as Brainloller.")
                 brainLoler = Brainloller(handler.pictureArray)
-                brainFuck = BrainFuck(brainLoler.brainFuckCode, defaultPointer, defaultMemory)
+                brainFuck = BrainFuck(brainLoler.brainFuckCode, defaultPointer, defaultMemory, test)
                 brainFuck.interpretBrainfuck(brainFuck.data)
-                print("\n")
+                #print("\n")
                 exit(0)
             if (handler.pictureType == "koptera"):
-                print("Brainfuck code given in source file", args.FILE,
-                      "will be interpreted and is recogized as Braincopter.")
+                #print("Brainfuck code given in source file", args.FILE,"will be interpreted and is recogized as Braincopter.")
                 brainCopter = Braincopter(handler.pictureArray)
-                brainFuck = BrainFuck(brainCopter.brainFuckCode, defaultPointer, defaultMemory)
+                brainFuck = BrainFuck(brainCopter.brainFuckCode, defaultPointer, defaultMemory, test)
                 brainFuck.interpretBrainfuck(brainFuck.data)
-                print("\n")
+                #print("\n")
                 exit(0)
         else:
-            # print(defaultMemory)
-            #print("KURVA")
-            brainFuck = BrainFuck(args.FILE, defaultPointer, defaultMemory)
+            args.FILE = args.FILE.replace("\"", "")
+            brainFuck = BrainFuck(args.FILE, defaultPointer, defaultMemory, test)
             brainFuck.interpretBrainfuck(brainFuck.data)
-            print(brainFuck.memory)
-            #with open("output.txt", "wb") as file:
-            #   file.write(brainFuck.memory)
+            if (args.testLogging):
+                brainFuck.fileLogging(1)
 
     if args.pictureToInput:
 
         inputPicture = args.pictureToInput[0]
         outputFile = args.pictureToInput[1]
         # print(inputPicture, outputFile)
-        print("With option: --lc2f starting translation from picture", inputPicture,
-              "to brainfuck code.\nBrainfuck code will be saved to", outputFile, ".")
+        #print("With option: --lc2f starting translation from picture", inputPicture,"to brainfuck code.\nBrainfuck code will be saved to", outputFile, ".")
         from myPNGlibrary import pngHandler as handler
 
         handler = handler(inputPicture)
@@ -320,7 +331,6 @@ if __name__ == '__main__':
             brainCopter = Braincopter(handler.pictureArray)
             with open(outputFile, 'w') as file:
                 file.write(brainCopter.brainFuckCode)
-        exit(0)
 
     if args.textToPNG:
         if (len(args.inputFile) == 1):
@@ -335,7 +345,7 @@ if __name__ == '__main__':
 
             from bfToPNG import createPNG
             handler = createPNG(args.inputFile[0], 'copter', args.outputFile, pngHandler, args.inputFile[1])
-        else:
-            print("Too many arguments.")
-            exit(1)
+
+
+
 

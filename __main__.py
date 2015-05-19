@@ -1,13 +1,17 @@
-__author__ = 'radimsky'
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import sys
 import re
 
 class BrainFuck:
-    def __init__(self, data, memoryInit=b'\x00'):
-        self.memory = bytearray(memoryInit)
-        self.memory_pointer = 0
+    def __init__(self, data, memoryPointer=0, memoryField=bytearray(b'\x00')):
+        self.memory = memoryField
+        # print("----------------------------------------")
+        self.memory_pointer = int(memoryPointer)
         self.data = data
+        #print(self.memory)
+
 
     def interpretBrainfuck(self, data):
         # Method pointer
@@ -16,25 +20,25 @@ class BrainFuck:
 
         while pointer < len(data):
             if data[pointer] == '+':
-                self.memory[self.memory_pointer] += 1
-
                 # Overflow detection
+                #print(self.memory[self.memory_pointer])
                 if (self.memory[self.memory_pointer] == 256):
                     self.memory[self.memory_pointer] = 0
-
+                self.memory[self.memory_pointer] += 1
             if data[pointer] == '-':
                 # Overflow detection
                 if (self.memory[self.memory_pointer] == -0):
                     self.memory[self.memory_pointer] = 0
                 else:
                     self.memory[self.memory_pointer] -= 1
+                    #print(self.memory[self.memory_pointer])
 
             # Move memory pointer for one position right
             # In case that field is not big enough, allocate new space
             if data[pointer] == '>':
                 self.memory_pointer += 1
                 if (len(self.memory) == self.memory_pointer):
-                    self.memory.append(0x00)
+                    self.memory.append(0)
 
             # Move memory pointer for one position left
             # until the pointer is at the beginning of the field
@@ -213,8 +217,6 @@ class Brainloller:
                 self.movingTwice[0] = 0
                 return
 
-
-
 # Test run
 if __name__ == '__main__':
     import argparse
@@ -227,45 +229,77 @@ if __name__ == '__main__':
                       help="Translation from given picture (BC and BL) to output or file")
     parser.add_argument("-i", "--input", nargs='+', dest="inputFile", help="Source file with brainfuck code")
     parser.add_argument("-o", "--output", dest="outputFile", help="Destination of file to be created")
-    parser.add_argument("-t", "--test", dest="testLogging", help="Adding of test output")
+    parser.add_argument("-t", "--test", action="store_true", dest="testLogging", help="Adding of test output")
+    parser.add_argument("-p", "--mpointer", dest="memoryPointer", help="Set memory pointer to specified position")
+    parser.add_argument("-m", "--memory", dest="memoryState", help="Set default memory state")
+    parser.add_argument("FILE", nargs='?', help="No argument, just input file")
 
     if ( len(sys.argv) == 1):
         print("Please input a brainfuck code. Given code will be executed (or at least, I will try)")
         inputStream = sys.stdin.read()
         print("\nGiven code in brainfuck:")
         brainFuck = BrainFuck(inputStream)
-    if ( len(sys.argv) == 2):
-        #print(sys.argv[1])
-        if ".b" in sys.argv[1]:
-            print("Brainfuck code given in source file", sys.argv[1], "will be interpreted.")
-            with open(sys.argv[1], 'r') as file:
-                brainFuck = BrainFuck(file.read())
-                print(brainFuck.data)
+
+    args = parser.parse_args()
+
+    defaultPointer = 0
+    defaultMemory = bytearray()
+
+    if args.memoryPointer:
+        defaultPointer = args.memoryPointer.encode('utf-8')
+
+    if args.memoryState:
+        # print(args.memoryState)
+        args.memoryState = args.memoryState.replace('\'', '')
+        test = args.memoryState.split('\\x')
+
+        number = ""
+        for char in test:
+            if (char != 'b'):
+                number = int(char, 16)
+                defaultMemory.append(number)
+
+    if args.FILE:
+        # print(args.FILE)
+        #print(defaultMemory)
+        #print(defaultPointer)
+        if ".b" in args.FILE:
+            print("Brainfuck code given in source file", args.FILE, "will be interpreted.")
+            with open(args.FILE, 'r') as file:
+                brainFuck = BrainFuck(file.read(), defaultPointer, defaultMemory)
+                #print(brainFuck.data)
                 brainFuck.interpretBrainfuck(brainFuck.data)
 
                 exit(0)
-        elif ".png" in sys.argv[1]:
+        elif ".png" in args.FILE:
             from myPNGlibrary import pngHandler as handler
 
-            handler = handler(sys.argv[1])
+            handler = handler(args.FILE)
+
             if (handler.pictureType == "loler"):
-                print("Brainfuck code given in source file", sys.argv[1],
+                print("Brainfuck code given in source file", args.FILE,
                       "will be interpreted and is recogized as Brainloller.")
                 brainLoler = Brainloller(handler.pictureArray)
-                brainFuck = BrainFuck(brainLoler.brainFuckCode)
+                brainFuck = BrainFuck(brainLoler.brainFuckCode, defaultPointer, defaultMemory)
                 brainFuck.interpretBrainfuck(brainFuck.data)
                 print("\n")
                 exit(0)
             if (handler.pictureType == "koptera"):
-                print("Brainfuck code given in source file", sys.argv[1],
+                print("Brainfuck code given in source file", args.FILE,
                       "will be interpreted and is recogized as Braincopter.")
                 brainCopter = Braincopter(handler.pictureArray)
-                brainFuck = BrainFuck(brainCopter.brainFuckCode)
+                brainFuck = BrainFuck(brainCopter.brainFuckCode, defaultPointer, defaultMemory)
                 brainFuck.interpretBrainfuck(brainFuck.data)
                 print("\n")
                 exit(0)
-
-    args = parser.parse_args()
+        else:
+            # print(defaultMemory)
+            #print("KURVA")
+            brainFuck = BrainFuck(args.FILE, defaultPointer, defaultMemory)
+            brainFuck.interpretBrainfuck(brainFuck.data)
+            print(brainFuck.memory)
+            #with open("output.txt", "wb") as file:
+            #   file.write(brainFuck.memory)
 
     if args.pictureToInput:
 

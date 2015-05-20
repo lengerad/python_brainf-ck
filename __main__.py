@@ -386,7 +386,7 @@ if __name__ == '__main__':
 
         if args.doPPM:
             create_pnm(picture_handler)
-            # DAVID
+            # DAVID DAVID DAVID TEST
     if args.textToPNG:
         # f2lc
         if len(args.inputFile) == 1:

@@ -160,5 +160,5 @@ class CreatePNG:
         # chunk_type = b'IEND'
         # chunk_data = bytes()
         # chunkLength = len(chunk_data)
-        #chunkCRC = zlib.crc32(bytes(chunk_type + chunk_data))
+        # chunkCRC = zlib.crc32(bytes(chunk_type + chunk_data))
         return b'\x00\x00\x00\x00IEND\xaeB`\x82'

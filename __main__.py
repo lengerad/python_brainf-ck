@@ -71,7 +71,8 @@ class BrainFuck:
                     self.memory[self.memory_pointer] = ord(sys.stdin.read(1))
 
             if data[pointer] == '#':
-                self.file_logging()
+                emptyData = []
+                self.file_logging(emptyData)
 
             pointer += 1
 
@@ -88,7 +89,7 @@ class BrainFuck:
         # code inside brackets
         return data[1:end_of_loop - 1]
 
-    def file_logging(self, png=0, data=[]):
+    def file_logging(self, pictureData, png=0):
         file_name = "debug_" + "{:0>2d}".format(self.log_file_number) + ".log"
         with open(file_name, "w") as log_file:
             sys.stdout = log_file
@@ -98,7 +99,7 @@ class BrainFuck:
             print("# output" + "\n" + str(bytes(self.output)) + "\n\n", end='')
             if png:
                 print("# RGB input" + "\n" + "[" + "\n", end='')
-                for i in data:
+                for i in pictureData:
                     print("    " + str(i) + ",\n", end='')
                 print("]" + "\n\n", end='')
         self.log_file_number += 1
@@ -345,11 +346,13 @@ if __name__ == '__main__':
             except:
                 traceback.print_exc(file=sys.stderr)
                 sys.exit(4)
+
         if args.testLogging:
             if takingPicturesOfYou:
-                brainFuck.file_logging(takingPicturesOfYou, picture_handler.pictureArray)
+                brainFuck.file_logging(picture_handler.pictureArray, takingPicturesOfYou)
             else:
-                brainFuck.file_logging(int(takingPicturesOfYou))
+                emptyData = []
+                brainFuck.file_logging(emptyData, int(takingPicturesOfYou))
 
     if args.pictureToInput:
         # lc2f
@@ -386,7 +389,7 @@ if __name__ == '__main__':
 
         if args.doPPM:
             create_pnm(picture_handler)
-            # DAVID DAVID DAVID TEST
+
     if args.textToPNG:
         # f2lc
         if len(args.inputFile) == 1:

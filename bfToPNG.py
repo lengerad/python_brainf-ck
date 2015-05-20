@@ -11,6 +11,7 @@ class createPNG:
         # print(len(self.bfCode))
         self.option = option
         self.pictureData = []
+        self.name = outfile
         # print(outfile)
 
         # print(self.pictureData)
@@ -18,13 +19,15 @@ class createPNG:
             self.file.write(b'\x89PNG\r\n\x1a\n')
             # Pridam si dva slouce pro otaceni
             if (option == "loller"):
-                self.height = math.ceil(math.sqrt(len(self.bfCode)))
-                self.width = self.height + 2
+                self.imageHeight = math.ceil(math.sqrt(len(self.bfCode)))
+                self.imageWidth = self.imageHeight + 2
                 self.createArray(self.lolThatCode)
             elif (option == "copter"):
+                # pngHandler.createArray()
                 self.pngData = pngHandler.pictureArray
-                self.height = math.ceil(math.sqrt(len(self.bfCode)))
-                self.width = self.height + 2
+                self.imageHeight = pngHandler.imageHeight
+                self.imageWidth = pngHandler.imageWidth
+                #print(self.imageHeight, self.imageWidth)
                 self.createArray(self.copterThatCode)
 
             self.file.write(self.createIHDR())
@@ -90,14 +93,14 @@ class createPNG:
             return (0, 0, 0)
 
     def createArray(self, translator):
-        self.pictureArray = [[0 for i in range(self.width)] for i in range(self.height)]
+        self.pictureArray = [[0 for i in range(self.imageWidth)] for i in range(self.imageHeight)]
         charPointer = 0;
         direction = 1
         i = 0
         j = 0
         while (1):
-            if (j == self.width - 1):
-                if (i == self.height - 1):
+            if (j == self.imageWidth - 1):
+                if (i == self.imageHeight - 1):
                     self.pictureArray[i][j] = translator("nop", i, j)
                     break
                 self.pictureArray[i][j] = translator("right", i, j)
@@ -107,7 +110,7 @@ class createPNG:
                 j += direction
                 continue
             if (j == 0 and i != 0):
-                if (i == self.height - 1):
+                if (i == self.imageHeight - 1):
                     self.pictureArray[i][j] = translator("nop", i, j)
                     break
                 self.pictureArray[i][j] = translator("left", i, j)
@@ -124,13 +127,14 @@ class createPNG:
             charPointer += 1;
 
 
-            # print(self.height, self.width)
+            # print(self.imageHeight, self.imageWidth)
             #print(i,j)
 
     def createIHDR(self):
         chunkType = b'IHDR'
         chunkData = bytes(
-            self.width.to_bytes(4, byteorder='big') + self.height.to_bytes(4, byteorder='big') + bytes([8]) + bytes(
+            self.imageWidth.to_bytes(4, byteorder='big') + self.imageHeight.to_bytes(4, byteorder='big') + bytes(
+                [8]) + bytes(
                 [2]) + bytes([0]) + bytes([0]) + bytes([0]))
         chunkLength = len(chunkData)
         chunkCRC = zlib.crc32(bytes(chunkType + chunkData))

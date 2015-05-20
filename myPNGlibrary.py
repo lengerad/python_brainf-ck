@@ -21,10 +21,10 @@ class pngHandler():
         self.a = (0, 0, 0)
         self.b = (0, 0, 0)
         self.c = (0, 0, 0)
-        self.createArray()
         self.decompressedData = []
+        self.name = path
+        self.createArray()
         self.recognizePicture()
-
 
     def checkHeader(self, binaryData):
         if binaryData[:8] != b'\x89PNG\r\n\x1a\n':

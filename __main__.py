@@ -22,7 +22,6 @@ class BrainFuck:
         # Method pointer
         # cannot mix self.memory_pointer and current pointer
         pointer = 0
-
         while pointer < len(data):
             if data[pointer] == '+':
                 # Overflow detection
@@ -240,6 +239,26 @@ class Brainloller:
                 return
 
 
+def create_pnm(picture_input):
+    # pictureData = picture_input
+    #print(picture_input.pictureArray)
+    pictureData = bytearray()
+    for row in picture_input.pictureArray:
+        for column in row:
+            for pixelPart in column:
+                #print(pixelPart)
+                pictureData.append(pixelPart)
+
+    print(picture_input.name)
+    with open(picture_input.name.split('.')[0] + ".ppm", "w") as ppmFile:
+        ppmFile.write("P6\n\n" + str(picture_input.imageWidth) + "  " + str(picture_input.imageHeight) +
+                      "\n\n255\n")
+    with open(picture_input.name.split('.')[0] + ".ppm", "ab") as ppmFile:
+        ppmFile.write(bytes(pictureData))
+
+        # with open(picture_input.name.split('.')[0] + ".ppm", "rb") as ppmFile:
+        # print(ppmFile.read())
+
 # Test run
 if __name__ == '__main__':
     import argparse
@@ -256,6 +275,7 @@ if __name__ == '__main__':
     parser.add_argument("-t", "--test", action="store_true", dest="testLogging", help=" Adding of test output")
     parser.add_argument("-p", "--mpointer", dest="memoryPointer", help="Set memory pointer to specified position")
     parser.add_argument("-m", "--memory", dest="memoryState", help="Set default memory state")
+    parser.add_argument("--ppm", "--pbm", action="store_true", dest="doPPM", help="Set default memory state")
     parser.add_argument("FILE", nargs='?', help="No argument, just input file")
 
     defaultPointer = 0
@@ -332,33 +352,57 @@ if __name__ == '__main__':
                 brainFuck.file_logging(int(takingPicturesOfYou))
 
     if args.pictureToInput:
+        # lc2f
         inputPicture = args.pictureToInput[0]
-        outputFile = args.pictureToInput[1]
-        from myPNGlibrary import pngHandler as pngHandler
+        if len(args.pictureToInput) > 1:
+            outputFile = args.pictureToInput[1]
 
-        picture_handler = pngHandler(inputPicture)
-        if picture_handler.pictureType == "loler":
-            brainLoler = Brainloller(picture_handler.pictureArray)
-            with open(outputFile, 'w') as file:
-                file.write(brainLoler.brainFuckCode)
+            from myPNGlibrary import pngHandler as pngHandler
 
-        if picture_handler.pictureType == "koptera":
-            brainCopter = Braincopter(picture_handler.pictureArray)
-            with open(outputFile, 'w') as file:
-                file.write(brainCopter.brainFuckCode)
+            picture_handler = pngHandler(inputPicture)
+
+            if picture_handler.pictureType == "loler":
+                brainLoler = Brainloller(picture_handler.pictureArray)
+                with open(outputFile, 'w') as file:
+                    file.write(brainLoler.brainFuckCode)
+
+            if picture_handler.pictureType == "koptera":
+                brainCopter = Braincopter(picture_handler.pictureArray)
+                with open(outputFile, 'w') as file:
+                    file.write(brainCopter.brainFuckCode)
+
+        else:
+            from myPNGlibrary import pngHandler as pngHandler
+
+            picture_handler = pngHandler(inputPicture)
+
+            if picture_handler.pictureType == "loler":
+                brainLoler = Brainloller(picture_handler.pictureArray)
+                print(brainLoler.brainFuckCode)
+
+            if picture_handler.pictureType == "koptera":
+                brainCopter = Braincopter(picture_handler.pictureArray)
+                print(brainCopter.brainFuckCode)
+
+        if args.doPPM:
+            create_pnm(picture_handler)
 
     if args.textToPNG:
+        # f2lc
         if len(args.inputFile) == 1:
             from bfToPNG import createPNG as createPNG
-
             handler = createPNG(args.inputFile[0], 'loller', args.outputFile)
+            if args.doPPM:
+                create_pnm(handler)
         elif len(args.inputFile) == 2:
             # print(args.inputFile[0])
             #print(args.inputFile[1])
             from myPNGlibrary import pngHandler
 
-            pnghandler = pngHandler(args.inputFile[1])
-
+            png_handler = pngHandler(args.inputFile[1])
             from bfToPNG import createPNG
 
-            handler = createPNG(args.inputFile[0], 'copter', args.outputFile, pnghandler, args.inputFile[1])
+            handler = createPNG(args.inputFile[0], 'copter', args.outputFile, png_handler, args.inputFile[1])
+            if args.doPPM:
+                create_pnm(handler)
+                create_pnm(png_handler)

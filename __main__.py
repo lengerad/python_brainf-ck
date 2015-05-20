@@ -242,19 +242,19 @@ class Brainloller:
 def create_pnm(picture_input):
     # pictureData = picture_input
     #print(picture_input.pictureArray)
-    pictureData = bytearray()
+    picture_data = bytearray()
     for row in picture_input.pictureArray:
         for column in row:
             for pixelPart in column:
                 #print(pixelPart)
-                pictureData.append(pixelPart)
+                picture_data.append(pixelPart)
 
     print(picture_input.name)
     with open(picture_input.name.split('.')[0] + ".ppm", "w") as ppmFile:
         ppmFile.write("P6\n\n" + str(picture_input.imageWidth) + "  " + str(picture_input.imageHeight) +
                       "\n\n255\n")
     with open(picture_input.name.split('.')[0] + ".ppm", "ab") as ppmFile:
-        ppmFile.write(bytes(pictureData))
+        ppmFile.write(bytes(picture_data))
 
         # with open(picture_input.name.split('.')[0] + ".ppm", "rb") as ppmFile:
         # print(ppmFile.read())
@@ -316,9 +316,9 @@ if __name__ == '__main__':
                 brainFuck.interpret_brainfuck(brainFuck.data)
 
         elif ".png" in args.FILE:
-            from myPNGlibrary import pngHandler as pngHandler
+            from myPNGlibrary import PngHandler as PngHandler
 
-            picture_handler = pngHandler(args.FILE)
+            picture_handler = PngHandler(args.FILE)
 
             if picture_handler.pictureType == "loler":
                 brainLoler = Brainloller(picture_handler.pictureArray)
@@ -357,9 +357,9 @@ if __name__ == '__main__':
         if len(args.pictureToInput) > 1:
             outputFile = args.pictureToInput[1]
 
-            from myPNGlibrary import pngHandler as pngHandler
+            from myPNGlibrary import PngHandler as PngHandler
 
-            picture_handler = pngHandler(inputPicture)
+            picture_handler = PngHandler(inputPicture)
 
             if picture_handler.pictureType == "loler":
                 brainLoler = Brainloller(picture_handler.pictureArray)
@@ -372,9 +372,9 @@ if __name__ == '__main__':
                     file.write(brainCopter.brainFuckCode)
 
         else:
-            from myPNGlibrary import pngHandler as pngHandler
+            from myPNGlibrary import PngHandler as PngHandler
 
-            picture_handler = pngHandler(inputPicture)
+            picture_handler = PngHandler(inputPicture)
 
             if picture_handler.pictureType == "loler":
                 brainLoler = Brainloller(picture_handler.pictureArray)
@@ -386,23 +386,23 @@ if __name__ == '__main__':
 
         if args.doPPM:
             create_pnm(picture_handler)
-
+            # DAVID
     if args.textToPNG:
         # f2lc
         if len(args.inputFile) == 1:
-            from bfToPNG import createPNG as createPNG
+            from bfToPNG import CreatePNG as createPNG
             handler = createPNG(args.inputFile[0], 'loller', args.outputFile)
             if args.doPPM:
                 create_pnm(handler)
         elif len(args.inputFile) == 2:
             # print(args.inputFile[0])
             #print(args.inputFile[1])
-            from myPNGlibrary import pngHandler
+            from myPNGlibrary import PngHandler
 
-            png_handler = pngHandler(args.inputFile[1])
-            from bfToPNG import createPNG
+            png_handler = PngHandler(args.inputFile[1])
+            from bfToPNG import CreatePNG
 
-            handler = createPNG(args.inputFile[0], 'copter', args.outputFile, png_handler, args.inputFile[1])
+            handler = CreatePNG(args.inputFile[0], 'copter', args.outputFile, png_handler)
             if args.doPPM:
                 create_pnm(handler)
                 create_pnm(png_handler)
